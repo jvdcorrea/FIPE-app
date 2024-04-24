@@ -1,9 +1,14 @@
 package br.jao.FIPEapp.main;
 
+import br.jao.FIPEapp.model.DadosFIPE;
 import br.jao.FIPEapp.model.DadosMarca;
+import br.jao.FIPEapp.model.DadosModelo;
+import br.jao.FIPEapp.model.Veiculo;
 import br.jao.FIPEapp.service.ConsumoApi;
 import br.jao.FIPEapp.service.ConverteDados;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class Menu {
@@ -25,12 +30,55 @@ public class Menu {
             System.out.println("Erro");
         }
 
-        var json = consumo.obterDados(url);
-        DadosMarca dadosMarca = conversor.obterDados(json, DadosMarca.class);
+        try {
+            var json = consumo.obterDados(url);
+            List<DadosMarca> dadosMarca = conversor.obterlista(json, DadosMarca.class);
+            dadosMarca.forEach(System.out::println);
+        }catch (Exception e){
+            System.out.println(e.getMessage());
+        }
 
-        //System.out.println(url);
-        //System.out.println(dadosMarca);
+        System.out.println("\nDigite o codigo do modelo desejado");
+        var opModelo = scanner.nextLine();
+        url = url + opModelo + "/modelos/";
+        System.out.println(url);
 
+        DadosModelo dadosParaFiltrar = new DadosModelo(null, null);
+        try {
+            var json = consumo.obterDados(url);
+            DadosModelo dadosModelo = conversor.obterDados(json, DadosModelo.class);
+           System.out.println(dadosModelo);
+           dadosParaFiltrar = dadosModelo;
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+
+        List<Veiculo> veiculos = new ArrayList<>();
+        System.out.println("Digite o nome do carro desejado.");
+        var nomeCarro = scanner.nextLine();
+        dadosParaFiltrar.modelos().stream()
+                .filter(e -> e.toString().toUpperCase().contains(nomeCarro.toUpperCase()))
+                        .forEach(e -> veiculos.add(new Veiculo(e.codigo(), e.nome())));
+
+        veiculos.forEach(System.out::println);
+
+        System.out.println("Digite o codigo do carro desejado");
+        var codigoVeiculo = scanner.nextLine();
+        url = url + codigoVeiculo + "/anos/";
+
+        try{
+            var json = consumo.obterDados(url);
+            List<DadosMarca> dadosAnos = conversor.obterlista(json, DadosMarca.class);
+            dadosAnos.forEach(System.out::println);
+
+            for(DadosMarca e : dadosAnos) {
+                json = url + e.codigo();
+                List<DadosFIPE> dfipe = conversor.obterlista(json, DadosFIPE.class);
+                System.out.println(dfipe);
+            }
+        } catch (Exception e){
+            System.out.println(e.getMessage());
+        }
 
 
 
