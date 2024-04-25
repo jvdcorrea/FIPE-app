@@ -72,8 +72,8 @@ public class Menu {
             dadosAnos.forEach(System.out::println);
 
             for(DadosMarca e : dadosAnos) {
-                json = url + e.codigo();
-                List<DadosFIPE> dfipe = conversor.obterlista(json, DadosFIPE.class);
+                json = consumo.obterDados(url + e.codigo());
+                DadosFIPE dfipe = conversor.obterDados(json, DadosFIPE.class);
                 System.out.println(dfipe);
             }
         } catch (Exception e){
